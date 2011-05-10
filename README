@@ -3,4 +3,5 @@ This is a repository for random scripts and files that I use for Android reversi
 Files:
 
 DEXTemplate.bt - a DEX file parsing template for the 010 hex editor (http://www.sweetscape.com/010editor)
+smali.vim - VIM syntax highlighting for smali files
 
