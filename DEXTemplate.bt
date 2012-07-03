@@ -441,7 +441,12 @@ typedef struct {
     uint checksum <format=hex, comment="Alder32 checksum of rest of file">;
     SHA1 signature <comment="SHA-1 signature of rest of file">;
     uint file_size <comment="File size in bytes">;
+
     uint header_size <comment="Header size in bytes">;
+    if(header_size > 0x70) {
+        Warning("Header size appears be to larger than expected");
+    }
+
     uint endian_tag <format=hex, comment="Endianness tag">;
 
     if(endian_tag != ENDIAN_CONSTANT) {
@@ -451,6 +456,9 @@ typedef struct {
 
     uint link_size <comment="Size of link section">;
     uint link_off <comment="File offset of link section">;
+    if(link_size != 0 || link_off != 0) {
+        Warning("A link section appears to be set, this is not supported");
+    }
     uint map_off <comment="File offset of map list">;
     uint string_ids_size <comment="Count of strings in the string ID list">;
     uint string_ids_off <comment="File offset of string ID list">;
@@ -1639,11 +1647,23 @@ if(odex) {
 
 // main dex header and structs
 header_item dex_header <comment="Dex file header">;
+
+FSeek(dex_header.string_ids_off);
 string_id_list dex_string_ids(dex_header.string_ids_size) <comment="String ID list">;
+
+FSeek(dex_header.type_ids_off);
 type_id_list dex_type_ids(dex_header.type_ids_size) <comment="Type ID list">;
+
+FSeek(dex_header.proto_ids_off);
 proto_id_list dex_proto_ids(dex_header.proto_ids_size) <comment="Method prototype ID list">;
+
+FSeek(dex_header.field_ids_off);
 field_id_list dex_field_ids(dex_header.field_ids_size) <comment="Field ID list">;
+
+FSeek(dex_header.method_ids_off);
 method_id_list dex_method_ids(dex_header.method_ids_size) <comment="Method ID list">;
+
+FSeek(dex_header.class_defs_off);
 class_def_item_list dex_class_defs(dex_header.class_defs_size) <comment="Class definitions list">;
 
 // map list, we don't really do anything with it though
