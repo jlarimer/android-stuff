@@ -714,9 +714,9 @@ typedef struct {
 } field_id_item <read=FieldIdItemRead, optimize=false>;
 
 string FieldIdItemRead(field_id_item &i) {
-    string type = GetLongTypeDescriptor(GetTypeById(i.type_idx));
-    string class = GetLongTypeDescriptor(GetTypeById(i.class_idx));
-    string name = GetStringById(i.name_idx);
+    local string type = GetLongTypeDescriptor(GetTypeById(i.type_idx));
+    local string class = GetLongTypeDescriptor(GetTypeById(i.class_idx));
+    local string name = GetStringById(i.name_idx);
 
     return type + " " + class + "." + name;
 }
