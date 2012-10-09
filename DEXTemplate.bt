@@ -3,13 +3,28 @@
 //
 // File: DEXTemplate.bt
 // Author: Jon Larimer <jlarimer@gmail.com>
-// Revision: 1.0
+//         Tim Strazzere <diff@lookout.com> <strazz@gmail.com>
+// Revision: 1.1
 // Purpose: A template for analyzing Dalvik VM (Android) DEX files
 //
 // License: This file is released into the public domain. People may 
 //          use it for any purpose, commercial or otherwise. 
 //--------------------------------------
 
+// Version 1.1 (2012-10-08)
+//
+// FIXED:
+//  - Same set of known issues below, though I've added some simple
+//    coloring to aid with visual inspection of APKS.
+//  - Linked section is called out in red
+//  - If there is a larger than normal header, it will be colored red
+//    and bundled into the "extra_padding" section of the header for
+//    easier inspection
+//
+// NEW ISSUES
+//  - Only color the linked section if it isn't null
+//
+//
 // Version 1.0 (2011-05-10)
 //
 // KNOWN ISSUES:
@@ -454,11 +469,15 @@ typedef struct {
         Warning("Invalid endian_tag %.8X, should be %.8X", endian_tag, ENDIAN_CONSTANT);
     }
 
+
+    SetBackColor(cLtRed);
     uint link_size <comment="Size of link section">;
     uint link_off <comment="File offset of link section">;
     if(link_size != 0 || link_off != 0) {
         Warning("A link section appears to be set, this is not supported");
     }
+    SetBackColor(cLtGreen);
+
     uint map_off <comment="File offset of map list">;
     uint string_ids_size <comment="Count of strings in the string ID list">;
     uint string_ids_off <comment="File offset of string ID list">;
@@ -473,7 +492,15 @@ typedef struct {
     uint class_defs_size <comment="Count of items in the class definitions list">;
     uint class_defs_off <comment="File offset of class definitions list">;
     uint data_size <comment="Size of data section in bytes">;
-    uint data_off <comment="File offset of data section">;    
+    uint data_off <comment="File offset of data section">;
+
+    // Anything after the rest of this, but before the other sections is essentiall
+    // just "padding", so lets create an array variable to contain it and color it
+    // properly
+    if(header_size > 0x70) {
+        SetBackColor(cLtRed);
+        char extra_padding[header_size - 0x70];
+    }
 } header_item;
 
 //////////////////////////////////////////////////
@@ -1646,27 +1673,36 @@ if(odex) {
 } 
 
 // main dex header and structs
+
+SetBackColor(cLtGreen);
 header_item dex_header <comment="Dex file header">;
 
 FSeek(dex_header.string_ids_off);
+SetBackColor(cLtYellow);
 string_id_list dex_string_ids(dex_header.string_ids_size) <comment="String ID list">;
 
 FSeek(dex_header.type_ids_off);
+SetBackColor(cLtPurple);
 type_id_list dex_type_ids(dex_header.type_ids_size) <comment="Type ID list">;
 
 FSeek(dex_header.proto_ids_off);
+SetBackColor(cLtBlue);
 proto_id_list dex_proto_ids(dex_header.proto_ids_size) <comment="Method prototype ID list">;
 
 FSeek(dex_header.field_ids_off);
+SetBackColor(cYellow);
 field_id_list dex_field_ids(dex_header.field_ids_size) <comment="Field ID list">;
 
 FSeek(dex_header.method_ids_off);
+SetBackColor(cDkYellow);
 method_id_list dex_method_ids(dex_header.method_ids_size) <comment="Method ID list">;
 
 FSeek(dex_header.class_defs_off);
+SetBackColor(cLtGray);
 class_def_item_list dex_class_defs(dex_header.class_defs_size) <comment="Class definitions list">;
 
 // map list, we don't really do anything with it though
+SetBackColor(cLtAqua);
 if(dex_header.map_off != 0) {
     FSeek(odexpad + dex_header.map_off);
     map_list_type dex_map_list <comment="Map list">;
